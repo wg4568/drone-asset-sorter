@@ -1,5 +1,9 @@
-import Image from "next/image";
+import App from "@/components/App";
 
 export default function Home() {
-    return <main>Hey</main>;
+    return (
+        <main className="m-16">
+            <App />
+        </main>
+    );
 }
