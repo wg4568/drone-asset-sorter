@@ -89,34 +89,33 @@ def find_next_img(current, remaining):
 
     closest = []
     for img in remaining:
-
+        pass
 
 if __name__ == "__main__":
-    image_dir = "/home/william/Desktop/DCIM/"
-    image_dir = "/media/william/C11A-BACF/DCIM/102MEDIA"
-    image_files = get_all_files(image_dir)
-    image_data = []
+    # image_dir = '/mnt/c/Users/william/Desktop/Dronebase 1-12'
+    # image_files = get_all_files(image_dir)
+    # image_data = []
 
-    total = len(image_files)
+    # total = len(image_files)
 
-    for idx, img in enumerate(image_files):
-        exif_data = get_exif_data(img)
-        image_data.append({
-            "path": img,
-            **exif_data
-        })
+    # for idx, img in enumerate(image_files):
+    #     exif_data = get_exif_data(img)
+    #     image_data.append({
+    #         "path": img,
+    #         **exif_data
+    #     })
 
-        print(int(idx / total * 100), img, exif_data["latitude"], exif_data["longitude"])
+    #     print(int(idx / total * 100), img, exif_data["latitude"], exif_data["longitude"])
     
-    with open("image_data.pickle", "wb") as f:
-        pickle.dump(image_data, f)
+    # with open("image_data.pickle", "wb") as f:
+    #     pickle.dump(image_data, f)
 
-    # with open("image_data.pickle", "rb") as f:
-    #     image_data = pickle.load(f)
+    with open("image_data.pickle", "rb") as f:
+        image_data = pickle.load(f)
     
-    # print(image_data)
+    print(image_data)
 
-
+    plot_images([image_data])
 
     # group = []
 
