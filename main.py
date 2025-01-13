@@ -7,8 +7,6 @@ import time
 import plotly.express as px
 import pandas as pd
 
-
-
 def plot_images(image_groups):
     data = {"Lat": [], "Long": [], "Name": [], "Group": [], "Time": []}
     color_scale = [(0, "orange"), (1, "red")]
@@ -94,38 +92,38 @@ def find_next_img(current, remaining):
 
 
 if __name__ == "__main__":
-    # image_dir = "/home/william/Desktop/DCIM/"
-    # image_dir = "/media/william/C11A-BACF/DCIM/102MEDIA"
-    # image_files = get_all_files(image_dir)
-    # image_data = []
+    image_dir = "/home/william/Desktop/DCIM/"
+    image_dir = "/media/william/C11A-BACF/DCIM/102MEDIA"
+    image_files = get_all_files(image_dir)
+    image_data = []
 
-    # total = len(image_files)
+    total = len(image_files)
 
-    # for idx, img in enumerate(image_files):
-    #     exif_data = get_exif_data(img)
-    #     image_data.append({
-    #         "path": img,
-    #         **exif_data
-    #     })
+    for idx, img in enumerate(image_files):
+        exif_data = get_exif_data(img)
+        image_data.append({
+            "path": img,
+            **exif_data
+        })
 
-    #     print(int(idx / total * 100), img, exif_data["latitude"], exif_data["longitude"])
+        print(int(idx / total * 100), img, exif_data["latitude"], exif_data["longitude"])
     
-    # with open("image_data_2.pickle", "wb") as f:
-    #     pickle.dump(image_data, f)
+    with open("image_data.pickle", "wb") as f:
+        pickle.dump(image_data, f)
 
-    with open("image_data.pickle", "rb") as f:
-        image_data = pickle.load(f)
+    # with open("image_data.pickle", "rb") as f:
+    #     image_data = pickle.load(f)
     
-    print(image_data)
+    # print(image_data)
 
 
 
-    group = []
+    # group = []
 
-    current = image_data[0]
+    # current = image_data[0]
 
-    while True:
-        for img in image_data[1:]:
+    # while True:
+    #     for img in image_data[1:]:
 
 
-    plot_images([image_data[:500], image_data[500:]])
+    # plot_images([image_data[:500], image_data[500:]])
