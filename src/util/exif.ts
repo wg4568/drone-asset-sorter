@@ -3,6 +3,10 @@ export interface ExifData {
     GPSLongitude: [number, number, number];
     GPSLatitudeRef: "N" | "S";
     GPSLongitudeRef: "W" | "E";
+    GPSAltitude: {
+        numerator: number;
+        denominator: number;
+    };
     DateTimeOriginal: string;
 }
 
@@ -34,4 +38,8 @@ export function getExifTime(exif: ExifData) {
     var split = exif.DateTimeOriginal.split(" ");
     var date = split[0].replace(/:/g, "-");
     return new Date(date + " " + split[1]);
+}
+
+export function getExifAltitude(exif: ExifData) {
+    return exif.GPSAltitude.numerator / exif.GPSAltitude.denominator;
 }

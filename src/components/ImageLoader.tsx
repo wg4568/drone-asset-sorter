@@ -1,6 +1,11 @@
 "use client";
 
-import { ExifData, getExifCoordinates, getExifTime } from "@/util/exif";
+import {
+    ExifData,
+    getExifAltitude,
+    getExifCoordinates,
+    getExifTime,
+} from "@/util/exif";
 import EXIF from "exif-js";
 import { useEffect, useRef, useState } from "react";
 import { ImageData } from "./App";
@@ -42,8 +47,11 @@ export default function ImageLoader({ onLoaded }: ImageLoaderProps) {
                 var data = {
                     ...getExifCoordinates(exif),
                     date: getExifTime(exif),
-                    file: files[i],
+                    altitude: getExifAltitude(exif),
+                    filename: files[i].name,
                 };
+
+                // console.log(exif);
 
                 setImageData((prev: ImageData[]) => {
                     return [...prev, data];
@@ -79,6 +87,10 @@ export default function ImageLoader({ onLoaded }: ImageLoaderProps) {
 
             <p>
                 Loading image {loadingState.loaded}/{loadingState.total}...
+            </p>
+
+            <p>
+                {Math.round((loadingState.loaded / loadingState.total) * 100)}%
             </p>
         </div>
     );
