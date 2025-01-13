@@ -1,9 +1,7 @@
-import { Canvas, useLoader } from "@react-three/fiber";
+import { Canvas, ThreeEvent, useLoader } from "@react-three/fiber";
 import { CameraControls } from "@react-three/drei";
 import sampleData from "@/util/sampleData";
-import { Color, TextureLoader, Vector3 } from "three";
-
-const alt_scale_factor = 2;
+import { Color, Vector3 } from "three";
 
 const vertexShader = `
 uniform float min;
@@ -32,42 +30,73 @@ void main() {
 }
 `;
 
+type Transform = {
+    offset: Vector3;
+    scale: Vector3;
+};
+
+type Bounds = {
+    min: Vector3;
+    max: Vector3;
+};
+
+function calculateBounds(points: Vector3[]) {
+    const x_values = points.map((p) => p.x);
+    const y_values = points.map((p) => p.y);
+    const z_values = points.map((p) => p.z);
+
+    return {
+        min: new Vector3(
+            Math.min(...x_values),
+            Math.min(...y_values),
+            Math.min(...z_values)
+        ),
+        max: new Vector3(
+            Math.max(...x_values),
+            Math.max(...y_values),
+            Math.max(...z_values)
+        ),
+    } as Bounds;
+}
+
+function applyTransform(point: Vector3, transform: Transform) {
+    return new Vector3(
+        (point.x + transform.offset.x) * transform.scale.x,
+        (point.y + transform.offset.y) * transform.scale.y,
+        (point.z + transform.offset.z) * transform.scale.z
+    );
+}
+
+function createGPSTransform(bounds: Bounds) {
+    const scale = new Vector3(111139, 2, 111139);
+    const offset = new Vector3(
+        (bounds.max.x + bounds.min.x) / -2,
+        0,
+        (bounds.max.z + bounds.min.z) / -2
+    );
+
+    return { scale, offset } as Transform;
+}
+
 export default function Viewer() {
-    const positions = new Float32Array(sampleData.length * 3);
+    const meshData = new Float32Array(sampleData.length * 3);
+    const imagePositions = sampleData.map(
+        (d) => new Vector3(d.latitude, d.altitude, d.longitude)
+    );
+    const bounds = calculateBounds(imagePositions);
+    const transform = createGPSTransform(bounds);
+    console.log(bounds, transform);
 
-    var min_lat = sampleData[0].latitude;
-    var max_lat = sampleData[0].latitude;
-    var min_lon = sampleData[0].longitude;
-    var max_lon = sampleData[0].longitude;
-    var min_alt = sampleData[0].altitude;
-    var max_alt = sampleData[0].altitude;
-
-    for (let i = 0; i < sampleData.length; i++) {
-        var item = sampleData[i];
-        if (item.latitude > max_lat) max_lat = item.latitude;
-        if (item.latitude < min_lat) min_lat = item.latitude;
-        if (item.longitude > max_lon) max_lon = item.longitude;
-        if (item.longitude < min_lon) min_lon = item.longitude;
-        if (item.altitude > max_alt) max_alt = item.altitude;
-        if (item.altitude < min_alt) min_alt = item.altitude;
-    }
-
-    var center_lat = (max_lat + min_lat) / 2;
-    var center_lon = (max_lon + min_lon) / 2;
-
-    for (let i = 0; i < sampleData.length; i++) {
+    for (let i = 0; i < imagePositions.length; i++) {
         const i3 = i * 3;
+        const point = applyTransform(imagePositions[i], transform);
 
-        const x = (sampleData[i].latitude - center_lat) * 111139;
-        const y = sampleData[i].altitude * alt_scale_factor;
-        const z = (sampleData[i].longitude - center_lon) * 111139;
+        console.log(point);
 
-        positions[i3] = x;
-        positions[i3 + 1] = y;
-        positions[i3 + 2] = z;
+        meshData[i3] = point.x;
+        meshData[i3 + 1] = point.y;
+        meshData[i3 + 2] = point.z;
     }
-
-    // const texture = useLoader(TextureLoader, "debug.jpg");
 
     return (
         <div className="w-full h-screen">
@@ -79,33 +108,21 @@ export default function Viewer() {
                 }}
             >
                 <ambientLight color={"white"} intensity={0.5} />
-
-                <CameraControls />
                 <gridHelper args={[1000, 50, 0xdddddd, 0xeeeeee]} />
 
-                {/* <mesh>
-                    <boxGeometry args={[50, 50, 50]} />
-                    <shaderMaterial
-                        vertexShader={vertexShader}
-                        fragmentShader={fragmentShader}
-                        uniforms={{
-                            color1: {
-                                value: new Color(0xff0000),
-                            },
-                            color2: {
-                                value: new Color(0x0000ff),
-                            },
-                        }}
-                    />
-                </mesh> */}
+                <CameraControls />
 
-                <points>
+                <points
+                    onClick={(e: ThreeEvent<MouseEvent>) => {
+                        console.log(e.point);
+                    }}
+                >
                     <bufferGeometry>
                         <bufferAttribute
                             attach="attributes-position"
                             count={sampleData.length}
                             itemSize={3}
-                            array={positions}
+                            array={meshData}
                         />
                     </bufferGeometry>
                     <shaderMaterial
@@ -119,10 +136,10 @@ export default function Viewer() {
                                 value: new Color(0x0000ff),
                             },
                             min: {
-                                value: min_alt * alt_scale_factor,
+                                value: applyTransform(bounds.min, transform).y,
                             },
                             max: {
-                                value: max_alt * alt_scale_factor,
+                                value: applyTransform(bounds.max, transform).y,
                             },
                         }}
                     />
